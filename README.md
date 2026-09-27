@@ -1,59 +1,47 @@
-# LibraryWeb
+# library-web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.0.
+The browser client for [dotnet-library](../dotnet-library) (Q-20): Angular 22, standalone components, signals,
+`resource()`, zoneless, lazy-loaded routes. Angular is the view only: every rule lives in the API, so a facade calls a
+service directly and the screen shows the API's own refusal messages.
 
-## Development server
+## Run it
 
-To start a local development server, run:
+1. In `../dotnet-library`: `docker compose up -d` (Postgres on 5433, Keycloak on 8080), then
+   `dotnet run --project Library.Api` (http://localhost:5074).
+2. Here: `npm install`, then `npm start`. Open http://localhost:4200.
 
-```bash
-ng serve
+Sign in through Keycloak as `patron`/`patron` or `librarian`/`librarian` (the realm is `keycloak/library-realm.json`
+in dotnet-library; this app is its `library-web` client, Authorization Code + PKCE). The patron must be enrolled first
+(the `enrollRealmPatron` request in `Library.Api.http`); the first `/me` call links the login to them.
+
+The dev server proxies `/api/*` to the API (`proxy.conf.json`), so the API needs no CORS. A production build needs the
+same: serve the app and the API under one origin, with `/api` routed to the API.
+
+## Layout
+
+```
+src/app/
+├── core/
+│   ├── auth/       Session (who is signed in, roles from the id token), roleGuard, Keycloak settings
+│   ├── http/       toApiError: the API's { code, message } → what the screen shows
+│   ├── models/     response shapes, one file per API area
+│   ├── services/   HttpClient wrappers, the only place that knows URLs
+│   └── facades/    signals + resource() per screen area; mutations return an Outcome
+├── features/<name>/{container,presentation}/   container = facade wiring, presentation = input()/output() only
+└── shared/components/                          loading, error banner, empty state, flash
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Screens
 
-## Code scaffolding
+| Route      | Who            | Stories                                             |
+|------------|----------------|-----------------------------------------------------|
+| `/`        | anyone         | sign in                                             |
+| `/search`  | signed in      | P1 search; patron: P2 borrow, P3 place hold          |
+| `/account` | patron         | P5 my account; P4 renew, P6 cancel hold              |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Next: the librarian desk (titles L1a–L1d, copies L2a–L2c, desk checkout/return L3a–L3c, patrons L0–L0d, fines
+L4a–L4d, reports L5a–L5c) and patron notices (`/me/notices`).
 
-```bash
-ng generate component component-name
-```
+## Checks
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+`npx ng build` (strict TypeScript and templates) and `npx ng test --watch=false` (Vitest).
