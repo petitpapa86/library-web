@@ -30,6 +30,10 @@ export class TitleSearchFacade {
     this._query.set({ ...filters, page: 1 });
   }
 
+  reload(): void {
+    this._results.reload();
+  }
+
   goToPage(page: number): void {
     this._query.update(q => ({ ...q, page }));
   }

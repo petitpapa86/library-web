@@ -6,6 +6,9 @@
       @if (session.isPatron()) {
         <a routerLink="/account" routerLinkActive="active">My account</a>
       }
+      @if (session.isLibrarian()) {
+        <a routerLink="/desk" routerLinkActive="active">Desk</a>
+      }
     </nav>
     <div class="who">
       <span>{{ session.userName() }}</span>

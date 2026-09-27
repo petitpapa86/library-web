@@ -18,6 +18,9 @@ import { RouterLink } from '@angular/router';
           @if (patron()) {
             <a routerLink="/account" class="button">My account</a>
           }
+          @if (librarian()) {
+            <a routerLink="/desk" class="button">Open the desk</a>
+          }
         </div>
       }
     </section>
@@ -26,6 +29,7 @@ import { RouterLink } from '@angular/router';
 export class HomeComponent {
   readonly signedIn = input(false);
   readonly patron = input(false);
+  readonly librarian = input(false);
   readonly name = input<string | null>(null);
   readonly signIn = output<void>();
 }

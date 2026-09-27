@@ -5,6 +5,7 @@ import { Role, rolesFrom } from './role.model';
 // Who is signed in, from the id token's claims. Signing in and out go through Keycloak's pages.
 @Injectable({ providedIn: 'root' })
 export class Session {
+  private static readonly returnUrlKey = 'library.returnUrl';
   private readonly oidc = inject(OidcSecurityService);
 
   readonly isSignedIn = computed(() => this.oidc.authenticated().isAuthenticated);
@@ -23,11 +24,29 @@ export class Session {
     return this.roles().includes(role);
   }
 
-  signIn(): void {
+  // Keycloak sends the browser back to the app's root; returnUrl is where to go from there.
+  signIn(returnUrl?: string): void {
+    if (returnUrl) this.storage()?.setItem(Session.returnUrlKey, returnUrl);
     this.oidc.authorize();
+  }
+
+  // The address remembered by signIn, once: null when there is none.
+  takeReturnUrl(): string | null {
+    const storage = this.storage();
+    const url = storage?.getItem(Session.returnUrlKey) ?? null;
+    storage?.removeItem(Session.returnUrlKey);
+    return url;
   }
 
   signOut(): void {
     this.oidc.logoff().subscribe();
+  }
+
+  private storage(): Storage | null {
+    try {
+      return window.sessionStorage;
+    } catch {
+      return null;
+    }
   }
 }

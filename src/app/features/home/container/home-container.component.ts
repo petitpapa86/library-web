@@ -10,6 +10,7 @@ import { HomeComponent } from '../presentation/home.component';
     <app-home
       [signedIn]="session.isSignedIn()"
       [patron]="session.isPatron()"
+      [librarian]="session.isLibrarian()"
       [name]="session.userName()"
       (signIn)="session.signIn()"
     />

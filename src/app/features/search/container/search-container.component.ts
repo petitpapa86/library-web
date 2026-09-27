@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Session } from '../../../core/auth/session';
+import { CatalogAdminFacade } from '../../../core/facades/catalog-admin.facade';
 import { MyAccountFacade } from '../../../core/facades/my-account.facade';
 import { Outcome } from '../../../core/facades/outcome';
 import { TitleSearchFacade } from '../../../core/facades/title-search.facade';
@@ -27,10 +28,14 @@ import { TitleResultsComponent } from '../presentation/title-results.component';
           [page]="page"
           [pageCount]="search.pageCount()"
           [canBorrow]="session.isPatron()"
+          [canManage]="session.isLibrarian()"
           [busyId]="busyId()"
           (borrow)="run($event, account.checkOut($event))"
           (hold)="run($event, account.placeHold($event))"
           (goTo)="search.goToPage($event)"
+          (edit)="run($event.title.titleId, admin.update($event.title.titleId, $event.draft))"
+          (addCopy)="run($event.title.titleId, admin.addCopy($event.title.titleId, $event.title.title, $event.barcode, $event.condition))"
+          (remove)="run($event.titleId, admin.remove($event.titleId, $event.title))"
         />
       }
     } @else {
@@ -41,6 +46,7 @@ import { TitleResultsComponent } from '../presentation/title-results.component';
 export class SearchContainerComponent {
   protected readonly search = inject(TitleSearchFacade);
   protected readonly account = inject(MyAccountFacade);
+  protected readonly admin = inject(CatalogAdminFacade);
   protected readonly session = inject(Session);
 
   protected readonly outcome = signal<Outcome | null>(null);

@@ -38,9 +38,19 @@ src/app/
 | `/`        | anyone         | sign in                                             |
 | `/search`  | signed in      | P1 search; patron: P2 borrow, P3 place hold          |
 | `/account` | patron         | P5 my account; P4 renew, P6 cancel hold              |
+| `/search`  | librarian      | on each title: L1b edit, L1c delete, L2a add a copy  |
+| `/desk/circulation` | librarian | L3b check out, L3a return (to maintenance: R-10), L3c lost |
+| `/desk/copies`      | librarian | by barcode: L2b condition, L2c maintenance in/out, L3c found |
+| `/desk/titles`      | librarian | L1a add a title, L1d restore a deleted one by id |
+| `/desk/patrons`     | librarian | L0 enroll; by Member ID: L0b contact, L0c close/reopen, L0d anonymise |
+| `/desk/fines`       | librarian | L4c record a payment, then waive/lower its fines (L4a, L4b) or reverse it (L4d) |
+| `/desk/reports`     | librarian | L5a overdue, L5b popular titles, L5c active fines, QA-03 reconciliation |
 
-Next: the librarian desk (titles L1a–L1d, copies L2a–L2c, desk checkout/return L3a–L3c, patrons L0–L0d, fines
-L4a–L4d, reports L5a–L5c) and patron notices (`/me/notices`).
+Every desk action lands in the desk log beside the section (the last 20 this session, in memory only).
+
+Not yet: patron notices (`/me/notices`). The desk works from what the librarian types (Member ID, barcode, ids),
+because the API has no librarian read side yet; see dotnet-library's backlog (L0e patron lookup, L1e find deleted
+titles, L2d a title's copies, the genre list).
 
 ## Checks
 
