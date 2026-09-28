@@ -6,8 +6,8 @@ import { TitleCopiesComponent } from './title-copies.component';
 export interface TitleEdit { readonly title: TitleSummary; readonly draft: TitleDraft }
 export interface NewCopy { readonly title: TitleSummary; readonly barcode: string; readonly condition: CopyCondition }
 
-// One row per title. A patron can borrow it (P2) or, when no copy is free, join its queue (P3); the API decides
-// which applies, so both are offered and a refusal comes back as a message. A librarian manages it instead, and can
+// One row per title, with the copies free to borrow now (P8). A patron is offered Borrow (P2) when one is free, else
+// Place hold (P3); the API still decides and a refusal comes back as a message. A librarian manages it instead, and can
 // open one title's copies (L2d).
 @Component({
   selector: 'app-title-results',
@@ -23,13 +23,25 @@ export interface NewCopy { readonly title: TitleSummary; readonly barcode: strin
             <h3>{{ t.title }}</h3>
             <p>{{ t.author }} · <span class="tag">{{ t.genre }}</span></p>
             <p class="muted small">ISBN {{ t.isbn }}</p>
+            <p class="small">
+              @if (t.copiesFree > 0) {
+                <span class="tag tag-ok">{{ t.copiesFree }} {{ t.copiesFree === 1 ? 'copy' : 'copies' }} free</span>
+              } @else {
+                <span class="tag">none free</span>
+              }
+            </p>
           </div>
           @if (canBorrow()) {
             <div class="card-actions">
-              <button type="button" class="primary" [disabled]="busyId() === t.titleId" (click)="borrow.emit(t.titleId)">
-                Borrow
-              </button>
-              <button type="button" [disabled]="busyId() === t.titleId" (click)="hold.emit(t.titleId)">Place hold</button>
+              @if (t.copiesFree > 0) {
+                <button type="button" class="primary" [disabled]="busyId() === t.titleId" (click)="borrow.emit(t.titleId)">
+                  Borrow
+                </button>
+              } @else {
+                <button type="button" class="primary" [disabled]="busyId() === t.titleId" (click)="hold.emit(t.titleId)">
+                  Place hold
+                </button>
+              }
             </div>
           }
           @if (canManage()) {

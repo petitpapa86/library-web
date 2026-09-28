@@ -37,7 +37,7 @@ src/app/
 | Route      | Who            | Stories                                             |
 |------------|----------------|-----------------------------------------------------|
 | `/`        | anyone         | sign in                                             |
-| `/search`  | signed in      | P1 search; patron: P2 borrow, P3 place hold          |
+| `/search`  | signed in      | P1 search with the copies free on each title (P8); patron: P2 borrow when one is free, else P3 place hold |
 | `/account` | patron         | P5 my account; P4 renew, P6 cancel hold; notices (P3 hold ready, P7 due soon/overdue), unread count beside the link |
 | `/search`  | librarian      | on each title: L2d its copies (condition, maintenance, found), L1b edit, L1c delete, L2a add a copy |
 | `/desk/circulation` | librarian | L3b check out, L3a return (to maintenance: R-10), L3c lost |

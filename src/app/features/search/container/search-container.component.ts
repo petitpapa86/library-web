@@ -79,9 +79,12 @@ export class SearchContainerComponent {
     }
   }
 
+  // Borrowing, a hold or a copy change moves the copies free (P8), so a success reloads the page shown.
   protected async run(titleId: string, action: Promise<Outcome>): Promise<void> {
     this.busyId.set(titleId);
-    this.outcome.set(await action);
+    const outcome = await action;
+    this.outcome.set(outcome);
+    if (outcome.ok) this.search.reload();
     this.busyId.set(null);
   }
 }

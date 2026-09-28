@@ -1,4 +1,4 @@
-// GET /titles (P1).
+// Title management shapes (L1a–L1e) share these fields.
 export interface TitleSummary {
   readonly titleId: string;
   readonly isbn: string;
@@ -7,8 +7,14 @@ export interface TitleSummary {
   readonly genre: string;
 }
 
+// GET /titles (P1 + P8): copiesFree is how many copies the caller could borrow now (their own set-aside copy
+// included); 0 means place a hold.
+export interface CatalogTitle extends TitleSummary {
+  readonly copiesFree: number;
+}
+
 export interface TitleSearchPage {
-  readonly items: readonly TitleSummary[];
+  readonly items: readonly CatalogTitle[];
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
