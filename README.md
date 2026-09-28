@@ -1,12 +1,13 @@
 # library-web
 
-The browser client for [dotnet-library](../dotnet-library) (Q-20): Angular 22, standalone components, signals,
+The browser client for [dotnet-library](https://github.com/petitpapa86/library-online) (Q-20): Angular 22, standalone components, signals,
 `resource()`, zoneless, lazy-loaded routes. Angular is the view only: every rule lives in the API, so a facade calls a
 service directly and the screen shows the API's own refusal messages.
 
 ## Run it
 
-1. In `../dotnet-library`: `docker compose up -d` (Postgres on 5433, Keycloak on 8080), then
+1. In the API repo ([library-online](https://github.com/petitpapa86/library-online), cloned beside this one as
+   `../dotnet-library`): `docker compose up -d` (Postgres on 5433, Keycloak on 8080), then
    `dotnet run --project Library.Api` (http://localhost:5074).
 2. Here: `npm install`, then `npm start`. Open http://localhost:4200.
 
