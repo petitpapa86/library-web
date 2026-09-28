@@ -3,6 +3,7 @@ import { FinesFacade } from '../../../core/facades/fines.facade';
 import { Outcome } from '../../../core/facades/outcome';
 import { PatronAdminFacade } from '../../../core/facades/patron-admin.facade';
 import { PatronLookupFacade } from '../../../core/facades/patron-lookup.facade';
+import { PatronSearchFacade } from '../../../core/facades/patron-search.facade';
 import { EnrollPatronRequest } from '../../../core/models';
 import { ErrorBannerComponent, FlashComponent, LoadingComponent } from '../../../shared/components';
 import { EnrollFormComponent } from '../presentation/enroll-form.component';
@@ -10,12 +11,13 @@ import { FineOverride, FineOverrideFormComponent } from '../presentation/fine-ov
 import { PatronAction, PatronActionsComponent } from '../presentation/patron-actions.component';
 import { PatronCardComponent } from '../presentation/patron-card.component';
 import { PatronLookupFormComponent } from '../presentation/patron-lookup-form.component';
+import { PatronSearchComponent } from '../presentation/patron-search.component';
 
 @Component({
   selector: 'app-patrons-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    EnrollFormComponent, PatronActionsComponent, PatronLookupFormComponent, PatronCardComponent, FineOverrideFormComponent,
+    EnrollFormComponent, PatronActionsComponent, PatronLookupFormComponent, PatronSearchComponent, PatronCardComponent, FineOverrideFormComponent,
     FlashComponent, ErrorBannerComponent, LoadingComponent,
   ],
   template: `
@@ -26,6 +28,20 @@ import { PatronLookupFormComponent } from '../presentation/patron-lookup-form.co
     <section>
       <h2>Look up a patron</h2>
       <app-patron-lookup-form [busy]="lookup.isLoading()" (lookUp)="lookUp($event)" />
+      <details class="panel" [open]="finder.page() !== null">
+        <summary>No Member ID? Find them by name or email</summary>
+        @if (finder.error(); as message) {
+          <app-error-banner [message]="message" />
+        }
+        <app-patron-search
+          [page]="finder.page()"
+          [pageCount]="finder.pageCount()"
+          [busy]="finder.isLoading()"
+          (search)="finder.search($event)"
+          (goTo)="finder.goToPage($event)"
+          (pick)="lookUp($event)"
+        />
+      </details>
       @if (lookup.error(); as message) {
         <app-error-banner [message]="message" />
       } @else if (lookup.view(); as view) {
@@ -53,6 +69,7 @@ import { PatronLookupFormComponent } from '../presentation/patron-lookup-form.co
 export class PatronsContainerComponent {
   private readonly patrons = inject(PatronAdminFacade);
   protected readonly lookup = inject(PatronLookupFacade);
+  protected readonly finder = inject(PatronSearchFacade);
   protected readonly fines = inject(FinesFacade);
   protected readonly busy = signal(false);
   protected readonly enrolled = signal(0);

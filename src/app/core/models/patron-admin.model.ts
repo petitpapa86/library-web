@@ -68,3 +68,20 @@ export interface PatronDeskView {
   readonly account: Account;
   readonly payments: readonly DeskPayment[];
 }
+
+// GET /patrons?q= (L0f): open and closed patrons whose name or email contains q; never an anonymised one.
+export interface PatronMatch {
+  readonly patronId: string;
+  readonly memberId: string;
+  readonly name: string;
+  readonly email: string | null;
+  readonly phone: string | null;
+  readonly closed: boolean;
+}
+
+export interface PatronSearchPage {
+  readonly items: readonly PatronMatch[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}

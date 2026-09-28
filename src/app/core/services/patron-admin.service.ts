@@ -1,13 +1,19 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AnonymisedPatron, EnrollPatronRequest, EnrolledPatron, PatronClosure, PatronContact, PatronDeskView } from '../models';
+import { AnonymisedPatron, EnrollPatronRequest, EnrolledPatron, PatronClosure, PatronContact, PatronDeskView, PatronSearchPage } from '../models';
 
 // Patrons at the desk (L0–L0e), by Member ID.
 @Injectable({ providedIn: 'root' })
 export class PatronAdminService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/patrons';
+
+  // L0f — q needs at least 2 characters (the API answers 400 otherwise).
+  async search(q: string, page: number, pageSize = 20): Promise<PatronSearchPage> {
+    const params = new HttpParams().set('q', q.trim()).set('page', page).set('pageSize', pageSize);
+    return firstValueFrom(this.http.get<PatronSearchPage>(this.base, { params }));
+  }
 
   // L0e — contact, status, account, and payments, with every fine and payment id.
   async lookup(memberId: string): Promise<PatronDeskView> {

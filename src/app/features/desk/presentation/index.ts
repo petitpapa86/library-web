@@ -12,3 +12,4 @@ export * from './reverse-payment-form.component';
 export * from './deleted-titles.component';
 export * from './patron-card.component';
 export * from './patron-lookup-form.component';
+export * from './patron-search.component';

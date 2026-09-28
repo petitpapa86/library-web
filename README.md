@@ -43,7 +43,7 @@ src/app/
 | `/desk/circulation` | librarian | L3b check out, L3a return (to maintenance: R-10), L3c lost |
 | `/desk/copies`      | librarian | by barcode: L2b condition, L2c maintenance in/out, L3c found |
 | `/desk/titles`      | librarian | L1a add a title, L1e find a deleted one and L1d restore it |
-| `/desk/patrons`     | librarian | L0e look up by Member ID: loans, holds, fines (waive/lower) and payments (reverse); L0 enroll; L0b contact, L0c close/reopen, L0d anonymise |
+| `/desk/patrons`     | librarian | L0f find by name or email, then L0e look up by Member ID: loans, holds, fines (waive/lower) and payments (reverse); L0 enroll; L0b contact, L0c close/reopen, L0d anonymise |
 | `/desk/fines`       | librarian | L4c record a payment, then waive/lower its fines (L4a, L4b) or reverse it (L4d) |
 | `/desk/reports`     | librarian | L5a overdue, L5b popular titles, L5c active fines, QA-03 reconciliation |
 
