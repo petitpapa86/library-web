@@ -38,7 +38,7 @@ src/app/
 |------------|----------------|-----------------------------------------------------|
 | `/`        | anyone         | sign in                                             |
 | `/search`  | signed in      | P1 search; patron: P2 borrow, P3 place hold          |
-| `/account` | patron         | P5 my account; P4 renew, P6 cancel hold              |
+| `/account` | patron         | P5 my account; P4 renew, P6 cancel hold; notices (P3 hold ready, P7 due soon/overdue), unread count beside the link |
 | `/search`  | librarian      | on each title: L2d its copies (condition, maintenance, found), L1b edit, L1c delete, L2a add a copy |
 | `/desk/circulation` | librarian | L3b check out, L3a return (to maintenance: R-10), L3c lost |
 | `/desk/copies`      | librarian | by barcode: L2b condition, L2c maintenance in/out, L3c found |
@@ -50,8 +50,6 @@ src/app/
 Every desk action lands in the desk log beside the section (the last 20 this session, in memory only), and reloads
 whatever read it changed: the open title's copies, the deleted titles, the patron looked up. Genres are picked from the
 library's list (`GET /genres`, L2d) wherever a title is added, edited or searched.
-
-Not yet: patron notices (`/me/notices`).
 
 ## Checks
 

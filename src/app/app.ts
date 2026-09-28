@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Session } from './core/auth/session';
+import { NoticesFacade } from './core/facades/notices.facade';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,7 @@ import { Session } from './core/auth/session';
 })
 export class App {
   protected readonly session = inject(Session);
+  protected readonly notices = inject(NoticesFacade);
   private readonly router = inject(Router);
 
   constructor() {

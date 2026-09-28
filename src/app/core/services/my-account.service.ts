@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Account, MyHold, MyLoan } from '../models';
+import { Account, MyHold, MyLoan, MyNotice } from '../models';
 
 // The signed-in patron's own lending (/me routes). The first call links the Keycloak login to the patron enrolled
 // with the same verified email (ADR-005).
@@ -24,6 +24,16 @@ export class MyAccountService {
 
   async placeHold(titleId: string): Promise<MyHold> {
     return firstValueFrom(this.http.post<MyHold>(`${this.base}/holds`, { titleId }));
+  }
+
+  // R-09 — in-app notices: a hold ready to collect (P3), a loan due soon or overdue (P7).
+  async notices(): Promise<MyNotice[]> {
+    return firstValueFrom(this.http.get<MyNotice[]>(`${this.base}/notices`));
+  }
+
+  // Marking it again keeps the first readAt.
+  async markRead(noticeId: string): Promise<MyNotice> {
+    return firstValueFrom(this.http.post<MyNotice>(`${this.base}/notices/${noticeId}/read`, null));
   }
 
   async cancelHold(holdId: string): Promise<void> {

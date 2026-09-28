@@ -1,19 +1,21 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MyAccountFacade } from '../../../core/facades/my-account.facade';
+import { NoticesFacade } from '../../../core/facades/notices.facade';
 import { Outcome } from '../../../core/facades/outcome';
 import { EmptyStateComponent, ErrorBannerComponent, FlashComponent, LoadingComponent } from '../../../shared/components';
 import { FinesComponent } from '../presentation/fines.component';
 import { HistoryComponent } from '../presentation/history.component';
 import { HoldsComponent } from '../presentation/holds.component';
 import { LoansComponent } from '../presentation/loans.component';
+import { NoticesComponent } from '../presentation/notices.component';
 
-// P5 — my account: loans, holds, fines and balance, loan history.
+// P5 — my account: notices (R-09), loans, holds, fines and balance, loan history.
 @Component({
   selector: 'app-account-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CurrencyPipe, LoansComponent, HoldsComponent, FinesComponent, HistoryComponent,
+    CurrencyPipe, NoticesComponent, LoansComponent, HoldsComponent, FinesComponent, HistoryComponent,
     LoadingComponent, ErrorBannerComponent, EmptyStateComponent, FlashComponent,
   ],
   template: `
@@ -28,6 +30,13 @@ import { LoansComponent } from '../presentation/loans.component';
         Member <strong class="mono">{{ account.memberId }}</strong> ·
         Balance <strong [class.danger]="account.balance > 0">{{ account.balance | currency: account.currency }}</strong>
       </p>
+
+      @if (notices.notices().length) {
+        <section>
+          <h2>Notices</h2>
+          <app-notices [notices]="notices.notices()" [busyId]="busyId()" (markRead)="markRead($event)" />
+        </section>
+      }
 
       <section>
         <h2>Loans</h2>
@@ -69,12 +78,20 @@ import { LoansComponent } from '../presentation/loans.component';
 })
 export class AccountContainerComponent implements OnInit {
   protected readonly facade = inject(MyAccountFacade);
+  protected readonly notices = inject(NoticesFacade);
   protected readonly outcome = signal<Outcome | null>(null);
   protected readonly busyId = signal<string | null>(null);
 
-  // The account changes at the desk too (returns, payments), so it is fetched fresh on every visit.
+  // The account and notices change at the desk and in the daily run, so they are fetched fresh on every visit.
   ngOnInit(): void {
     this.facade.reload();
+    this.notices.reload();
+  }
+
+  protected async markRead(noticeId: string): Promise<void> {
+    this.busyId.set(noticeId);
+    await this.notices.markRead(noticeId);
+    this.busyId.set(null);
   }
 
   protected async run(id: string, action: Promise<Outcome>): Promise<void> {

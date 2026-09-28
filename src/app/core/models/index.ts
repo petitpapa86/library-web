@@ -5,3 +5,4 @@ export * from './lending.model';
 export * from './patron-admin.model';
 export * from './reports.model';
 export * from './title.model';
+export * from './notice.model';

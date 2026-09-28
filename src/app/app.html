@@ -4,7 +4,12 @@
     <nav>
       <a routerLink="/search" routerLinkActive="active">Catalog</a>
       @if (session.isPatron()) {
-        <a routerLink="/account" routerLinkActive="active">My account</a>
+        <a routerLink="/account" routerLinkActive="active">
+          My account
+          @if (notices.unread(); as unread) {
+            <span class="tag tag-danger" [attr.aria-label]="unread + ' unread notices'">{{ unread }}</span>
+          }
+        </a>
       }
       @if (session.isLibrarian()) {
         <a routerLink="/desk" routerLinkActive="active">Desk</a>
