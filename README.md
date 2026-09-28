@@ -38,19 +38,19 @@ src/app/
 | `/`        | anyone         | sign in                                             |
 | `/search`  | signed in      | P1 search; patron: P2 borrow, P3 place hold          |
 | `/account` | patron         | P5 my account; P4 renew, P6 cancel hold              |
-| `/search`  | librarian      | on each title: L1b edit, L1c delete, L2a add a copy  |
+| `/search`  | librarian      | on each title: L2d its copies (condition, maintenance, found), L1b edit, L1c delete, L2a add a copy |
 | `/desk/circulation` | librarian | L3b check out, L3a return (to maintenance: R-10), L3c lost |
 | `/desk/copies`      | librarian | by barcode: L2b condition, L2c maintenance in/out, L3c found |
-| `/desk/titles`      | librarian | L1a add a title, L1d restore a deleted one by id |
-| `/desk/patrons`     | librarian | L0 enroll; by Member ID: L0b contact, L0c close/reopen, L0d anonymise |
+| `/desk/titles`      | librarian | L1a add a title, L1e find a deleted one and L1d restore it |
+| `/desk/patrons`     | librarian | L0e look up by Member ID: loans, holds, fines (waive/lower) and payments (reverse); L0 enroll; L0b contact, L0c close/reopen, L0d anonymise |
 | `/desk/fines`       | librarian | L4c record a payment, then waive/lower its fines (L4a, L4b) or reverse it (L4d) |
 | `/desk/reports`     | librarian | L5a overdue, L5b popular titles, L5c active fines, QA-03 reconciliation |
 
-Every desk action lands in the desk log beside the section (the last 20 this session, in memory only).
+Every desk action lands in the desk log beside the section (the last 20 this session, in memory only), and reloads
+whatever read it changed: the open title's copies, the deleted titles, the patron looked up. Genres are picked from the
+library's list (`GET /genres`, L2d) wherever a title is added, edited or searched.
 
-Not yet: patron notices (`/me/notices`). The desk works from what the librarian types (Member ID, barcode, ids),
-because the API has no librarian read side yet; see dotnet-library's backlog (L0e patron lookup, L1e find deleted
-titles, L2d a title's copies, the genre list).
+Not yet: patron notices (`/me/notices`).
 
 ## Checks
 

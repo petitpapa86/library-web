@@ -8,5 +8,7 @@ export * from './last-payment.component';
 export * from './patron-actions.component';
 export * from './payment-form.component';
 export * from './reports.component';
-export * from './restore-title-form.component';
 export * from './reverse-payment-form.component';
+export * from './deleted-titles.component';
+export * from './patron-card.component';
+export * from './patron-lookup-form.component';

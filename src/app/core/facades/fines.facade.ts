@@ -4,13 +4,15 @@ import { FinesService } from '../services/fines.service';
 import { DeskLog } from './desk-log';
 import { money } from './money';
 import { Outcome, attempt } from './outcome';
+import { PatronLookupFacade } from './patron-lookup.facade';
 
 // Fines and payments at the desk (L4a–L4d). The last payment recorded is kept, so its fines can be waived or adjusted
-// and the payment itself reversed, without retyping ids.
+// and the payment itself reversed, without retyping ids. A change reloads the patron looked up (L0e).
 @Injectable({ providedIn: 'root' })
 export class FinesFacade {
   private readonly service = inject(FinesService);
   private readonly log = inject(DeskLog);
+  private readonly lookup = inject(PatronLookupFacade);
 
   private readonly _lastPayment = signal<RecordedPayment | null>(null);
   readonly lastPayment = this._lastPayment.asReadonly();
@@ -42,6 +44,8 @@ export class FinesFacade {
   }
 
   private async run<T>(action: string, fn: () => Promise<T>, confirm: (value: T) => string): Promise<Outcome> {
-    return this.log.record(action, await attempt(fn, confirm));
+    const outcome = await attempt(fn, confirm);
+    if (outcome.ok) this.lookup.reload();
+    return this.log.record(action, outcome);
   }
 }

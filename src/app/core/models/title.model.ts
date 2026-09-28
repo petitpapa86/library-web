@@ -31,3 +31,15 @@ export interface TitleDraft {
 export interface NewTitle extends TitleDraft {
   readonly isbn: string;
 }
+
+// GET /titles/deleted (L1e): P1's filters and paging over deleted titles only, librarian-only.
+export interface DeletedTitle extends TitleSummary {
+  readonly deletedAt: string;
+}
+
+export interface DeletedTitlePage {
+  readonly items: readonly DeletedTitle[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}

@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CopyCondition, copyConditions } from '../../../core/models';
-
-export type CopyAction =
-  | { readonly kind: 'condition'; readonly barcode: string; readonly condition: CopyCondition }
-  | { readonly kind: 'maintenance' | 'backInService' | 'found'; readonly barcode: string };
+import { CopyAction, CopyCondition, copyConditions } from '../../../core/models';
 
 // A copy in hand, by barcode: its condition (L2b), maintenance in and out (L2c), found after being lost (L3c).
 @Component({

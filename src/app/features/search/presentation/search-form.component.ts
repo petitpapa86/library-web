@@ -13,7 +13,12 @@ export type SearchFilters = Omit<TitleSearchQuery, 'page'>;
     <form class="search-form" [formGroup]="form" (ngSubmit)="submit()" role="search">
       <label>Title <input formControlName="title" type="search" autocomplete="off" /></label>
       <label>Author <input formControlName="author" type="search" autocomplete="off" /></label>
-      <label>Genre <input formControlName="genre" type="search" autocomplete="off" /></label>
+      <label>Genre
+        <select formControlName="genre">
+          <option value="">Any genre</option>
+          @for (g of genres(); track g) { <option [value]="g">{{ g }}</option> }
+        </select>
+      </label>
       <button type="submit" class="primary" [disabled]="busy()">Search</button>
     </form>
   `,
@@ -22,6 +27,7 @@ export class SearchFormComponent {
   private readonly fb = inject(FormBuilder).nonNullable;
 
   readonly busy = input(false);
+  readonly genres = input<readonly string[]>([]);
   readonly search = output<SearchFilters>();
 
   protected readonly form = this.fb.group({ title: [''], author: [''], genre: [''] });

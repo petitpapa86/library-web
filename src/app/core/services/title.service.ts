@@ -1,7 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { CopyCondition, CopyView, NewTitle, TitleDraft, TitleSearchPage, TitleSearchQuery, TitleSummary } from '../models';
+import {
+  CopyCondition, CopyView, DeletedTitlePage, NewTitle, TitleCopies, TitleDraft, TitleSearchPage, TitleSearchQuery, TitleSummary,
+} from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class TitleService {
@@ -10,12 +12,22 @@ export class TitleService {
 
   // P1 — the filters are ANDed; none browses the whole catalog.
   async search(query: TitleSearchQuery, pageSize = 20): Promise<TitleSearchPage> {
-    let params = new HttpParams().set('page', query.page).set('pageSize', pageSize);
-    for (const key of ['title', 'author', 'genre'] as const) {
-      const value = query[key]?.trim();
-      if (value) params = params.set(key, value);
-    }
-    return firstValueFrom(this.http.get<TitleSearchPage>(this.base, { params }));
+    return firstValueFrom(this.http.get<TitleSearchPage>(this.base, { params: this.params(query, pageSize) }));
+  }
+
+  // L1e — the same filters and paging over deleted titles only (librarian).
+  async searchDeleted(query: TitleSearchQuery, pageSize = 20): Promise<DeletedTitlePage> {
+    return firstValueFrom(this.http.get<DeletedTitlePage>(`${this.base}/deleted`, { params: this.params(query, pageSize) }));
+  }
+
+  // L2d — a title's copies (librarian).
+  async copies(titleId: string): Promise<TitleCopies> {
+    return firstValueFrom(this.http.get<TitleCopies>(`${this.base}/${titleId}/copies`));
+  }
+
+  // L2d — the library's configured genres (any signed-in user).
+  async genres(): Promise<string[]> {
+    return firstValueFrom(this.http.get<string[]>('/api/genres'));
   }
 
   // L1a
@@ -41,5 +53,14 @@ export class TitleService {
   // L2a
   async addCopy(titleId: string, barcode: string, condition: CopyCondition): Promise<CopyView> {
     return firstValueFrom(this.http.post<CopyView>(`${this.base}/${titleId}/copies`, { barcode, condition }));
+  }
+
+  private params(query: TitleSearchQuery, pageSize: number): HttpParams {
+    let params = new HttpParams().set('page', query.page).set('pageSize', pageSize);
+    for (const key of ['title', 'author', 'genre'] as const) {
+      const value = query[key]?.trim();
+      if (value) params = params.set(key, value);
+    }
+    return params;
   }
 }

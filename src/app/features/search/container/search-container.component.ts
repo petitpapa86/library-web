@@ -1,9 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Session } from '../../../core/auth/session';
 import { CatalogAdminFacade } from '../../../core/facades/catalog-admin.facade';
+import { DeskFacade } from '../../../core/facades/desk.facade';
+import { GenreFacade } from '../../../core/facades/genre.facade';
 import { MyAccountFacade } from '../../../core/facades/my-account.facade';
 import { Outcome } from '../../../core/facades/outcome';
+import { TitleCopiesFacade } from '../../../core/facades/title-copies.facade';
 import { TitleSearchFacade } from '../../../core/facades/title-search.facade';
+import { CopyAction } from '../../../core/models';
 import { EmptyStateComponent, ErrorBannerComponent, FlashComponent, LoadingComponent } from '../../../shared/components';
 import { SearchFilters, SearchFormComponent } from '../presentation/search-form.component';
 import { TitleResultsComponent } from '../presentation/title-results.component';
@@ -14,7 +18,7 @@ import { TitleResultsComponent } from '../presentation/title-results.component';
   imports: [SearchFormComponent, TitleResultsComponent, LoadingComponent, ErrorBannerComponent, EmptyStateComponent, FlashComponent],
   template: `
     <h1>Catalog</h1>
-    <app-search-form [busy]="search.isLoading()" (search)="onSearch($event)" />
+    <app-search-form [busy]="search.isLoading()" [genres]="genre.genres()" (search)="onSearch($event)" />
     @if (outcome(); as o) {
       <app-flash [outcome]="o" (dismiss)="outcome.set(null)" />
     }
@@ -30,6 +34,12 @@ import { TitleResultsComponent } from '../presentation/title-results.component';
           [canBorrow]="session.isPatron()"
           [canManage]="session.isLibrarian()"
           [busyId]="busyId()"
+          [genres]="genre.genres()"
+          [openCopies]="copies.titleId()"
+          [copies]="copies.copies()"
+          [copiesError]="copies.error()"
+          (toggleCopies)="copies.toggle($event)"
+          (copyAction)="run($event.title.titleId, copyAction($event.action))"
           (borrow)="run($event, account.checkOut($event))"
           (hold)="run($event, account.placeHold($event))"
           (goTo)="search.goToPage($event)"
@@ -48,6 +58,9 @@ export class SearchContainerComponent {
   protected readonly account = inject(MyAccountFacade);
   protected readonly admin = inject(CatalogAdminFacade);
   protected readonly session = inject(Session);
+  protected readonly genre = inject(GenreFacade);
+  protected readonly copies = inject(TitleCopiesFacade);
+  private readonly desk = inject(DeskFacade);
 
   protected readonly outcome = signal<Outcome | null>(null);
   protected readonly busyId = signal<string | null>(null);
@@ -55,6 +68,15 @@ export class SearchContainerComponent {
   protected onSearch(filters: SearchFilters): void {
     this.outcome.set(null);
     this.search.search(filters);
+  }
+
+  private copyAction(action: CopyAction): Promise<Outcome> {
+    switch (action.kind) {
+      case 'condition': return this.desk.changeCondition(action.barcode, action.condition);
+      case 'maintenance': return this.desk.sendToMaintenance(action.barcode);
+      case 'backInService': return this.desk.endMaintenance(action.barcode);
+      case 'found': return this.desk.markFound(action.barcode);
+    }
   }
 
   protected async run(titleId: string, action: Promise<Outcome>): Promise<void> {

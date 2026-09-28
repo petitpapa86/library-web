@@ -1,16 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CopyCondition, TitleDraft, TitleSummary, copyConditions } from '../../../core/models';
 
 type Panel = 'edit' | 'copy' | 'delete' | null;
 
-// A librarian's controls on one catalog card: edit (L1b, the ISBN stays), add a copy (L2a), delete (L1c, asks first).
+// A librarian's controls on one catalog card: its copies (L2d, one title's open at a time), edit (L1b, the ISBN stays),
+// add a copy (L2a), delete (L1c, asks first).
 @Component({
   selector: 'app-title-admin',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
   template: `
     <div class="card-actions">
+      <button type="button" [class.active-toggle]="copiesOpen()" (click)="toggleCopies.emit()">Copies</button>
       <button type="button" [class.active-toggle]="panel() === 'copy'" (click)="open('copy')">Add copy</button>
       <button type="button" [class.active-toggle]="panel() === 'edit'" (click)="open('edit')">Edit</button>
       <button type="button" class="danger-button" [class.active-toggle]="panel() === 'delete'" (click)="open('delete')">Delete</button>
@@ -21,7 +23,11 @@ type Panel = 'edit' | 'copy' | 'delete' | null;
           <label>Title <input formControlName="title" /></label>
           <div class="grid-2">
             <label>Author <input formControlName="author" /></label>
-            <label>Genre <input formControlName="genre" /></label>
+            <label>Genre
+              <select formControlName="genre">
+                @for (g of genreChoices(); track g) { <option [value]="g">{{ g }}</option> }
+              </select>
+            </label>
           </div>
           <div class="actions">
             <button type="submit" class="primary" [disabled]="edit.invalid || busy()">Save</button>
@@ -53,11 +59,19 @@ export class TitleAdminComponent {
 
   readonly title = input.required<TitleSummary>();
   readonly busy = input(false);
+  readonly genres = input<readonly string[]>([]);
+  readonly copiesOpen = input(false);
+  readonly toggleCopies = output<void>();
   readonly save = output<TitleDraft>();
   readonly addCopy = output<{ barcode: string; condition: CopyCondition }>();
   readonly remove = output<void>();
 
   protected readonly panel = signal<Panel>(null);
+  // A title keeps a genre that has since left the list (Genre.Restore), so it stays choosable here.
+  protected readonly genreChoices = computed(() => {
+    const current = this.title().genre;
+    return this.genres().includes(current) ? this.genres() : [current, ...this.genres()];
+  });
   protected readonly conditions = copyConditions;
   protected readonly edit = this.fb.group({
     title: ['', Validators.required], author: ['', Validators.required], genre: ['', Validators.required],

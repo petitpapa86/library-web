@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, input, output } fro
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NewTitle } from '../../../core/models';
 
-// L1a — the ISBN (10 or 13 digits) is set once and never changes (C-12). The genre must be one the library has
-// configured; the API says so if it isn't.
+// L1a — the ISBN (10 or 13 digits) is set once and never changes (C-12). The genre is picked from the library's list
+// (L2d).
 @Component({
   selector: 'app-add-title-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -12,7 +12,12 @@ import { NewTitle } from '../../../core/models';
     <form class="stack" [formGroup]="form" (ngSubmit)="submit()">
       <div class="grid-2">
         <label>ISBN <input formControlName="isbn" autocomplete="off" /></label>
-        <label>Genre <input formControlName="genre" autocomplete="off" /></label>
+        <label>Genre
+          <select formControlName="genre">
+            <option value="" disabled>Choose a genre</option>
+            @for (g of genres(); track g) { <option [value]="g">{{ g }}</option> }
+          </select>
+        </label>
       </div>
       <label>Title <input formControlName="title" autocomplete="off" /></label>
       <label>Author <input formControlName="author" autocomplete="off" /></label>
@@ -25,6 +30,7 @@ export class AddTitleFormComponent {
 
   readonly busy = input(false);
   readonly done = input(0);
+  readonly genres = input<readonly string[]>([]);
   readonly add = output<NewTitle>();
 
   protected readonly form = this.fb.group({

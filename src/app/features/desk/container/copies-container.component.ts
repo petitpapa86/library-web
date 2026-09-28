@@ -3,7 +3,8 @@ import { RouterLink } from '@angular/router';
 import { DeskFacade } from '../../../core/facades/desk.facade';
 import { Outcome } from '../../../core/facades/outcome';
 import { FlashComponent } from '../../../shared/components';
-import { CopyAction, CopyFormComponent } from '../presentation/copy-form.component';
+import { CopyAction } from '../../../core/models';
+import { CopyFormComponent } from '../presentation/copy-form.component';
 
 @Component({
   selector: 'app-copies-container',

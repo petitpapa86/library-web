@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 export type PatronAction =
@@ -46,10 +46,19 @@ export class PatronActionsComponent {
   private readonly fb = inject(FormBuilder).nonNullable;
 
   readonly busy = input(false);
+  // Filled from the patron looked up (L0e).
+  readonly lookedUp = input<string | null>(null);
   readonly act = output<PatronAction>();
 
   protected readonly confirming = signal(false);
   protected readonly form = this.fb.group({ memberId: ['', Validators.required], email: [''], phone: [''] });
+
+  constructor() {
+    effect(() => {
+      const memberId = this.lookedUp();
+      if (memberId) this.form.controls.memberId.setValue(memberId);
+    });
+  }
 
   protected memberId(): string {
     return this.form.controls.memberId.value.trim();

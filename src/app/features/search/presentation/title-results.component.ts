@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { CopyCondition, TitleDraft, TitleSearchPage, TitleSummary } from '../../../core/models';
+import { CopyAction, CopyCondition, TitleCopies, TitleDraft, TitleSearchPage, TitleSummary } from '../../../core/models';
 import { TitleAdminComponent } from './title-admin.component';
+import { TitleCopiesComponent } from './title-copies.component';
 
 export interface TitleEdit { readonly title: TitleSummary; readonly draft: TitleDraft }
 export interface NewCopy { readonly title: TitleSummary; readonly barcode: string; readonly condition: CopyCondition }
 
 // One row per title. A patron can borrow it (P2) or, when no copy is free, join its queue (P3); the API decides
-// which applies, so both are offered and a refusal comes back as a message. A librarian manages it instead.
+// which applies, so both are offered and a refusal comes back as a message. A librarian manages it instead, and can
+// open one title's copies (L2d).
 @Component({
   selector: 'app-title-results',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TitleAdminComponent],
+  imports: [TitleAdminComponent, TitleCopiesComponent],
   template: `
     @let result = page();
     <p class="muted">{{ result.totalCount }} {{ result.totalCount === 1 ? 'title' : 'titles' }}</p>
@@ -35,10 +37,24 @@ export interface NewCopy { readonly title: TitleSummary; readonly barcode: strin
               class="card-admin"
               [title]="t"
               [busy]="busyId() === t.titleId"
+              [genres]="genres()"
+              [copiesOpen]="openCopies() === t.titleId"
+              (toggleCopies)="toggleCopies.emit(t.titleId)"
               (save)="edit.emit({ title: t, draft: $event })"
               (addCopy)="addCopy.emit({ title: t, barcode: $event.barcode, condition: $event.condition })"
               (remove)="remove.emit(t)"
             />
+            @if (openCopies() === t.titleId) {
+              <div class="panel">
+                @if (copiesError(); as message) {
+                  <p class="danger">{{ message }}</p>
+                } @else if (copies(); as shelf) {
+                  <app-title-copies [copies]="shelf" [busy]="busyId() === t.titleId" (act)="copyAction.emit({ title: t, action: $event })" />
+                } @else {
+                  <p class="muted small">Loading copies…</p>
+                }
+              </div>
+            }
           }
         </li>
       }
@@ -58,10 +74,17 @@ export class TitleResultsComponent {
   readonly canBorrow = input(false);
   readonly canManage = input(false);
   readonly busyId = input<string | null>(null);
+  readonly genres = input<readonly string[]>([]);
+  // The title whose copies are open, and those copies once loaded.
+  readonly openCopies = input<string | null>(null);
+  readonly copies = input<TitleCopies | null>(null);
+  readonly copiesError = input<string | null>(null);
   readonly borrow = output<string>();
   readonly hold = output<string>();
   readonly goTo = output<number>();
   readonly edit = output<TitleEdit>();
   readonly addCopy = output<NewCopy>();
   readonly remove = output<TitleSummary>();
+  readonly toggleCopies = output<string>();
+  readonly copyAction = output<{ title: TitleSummary; action: CopyAction }>();
 }

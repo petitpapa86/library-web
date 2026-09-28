@@ -1,13 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AnonymisedPatron, EnrollPatronRequest, EnrolledPatron, PatronClosure, PatronContact } from '../models';
+import { AnonymisedPatron, EnrollPatronRequest, EnrolledPatron, PatronClosure, PatronContact, PatronDeskView } from '../models';
 
-// Patrons at the desk (L0–L0d), by Member ID.
+// Patrons at the desk (L0–L0e), by Member ID.
 @Injectable({ providedIn: 'root' })
 export class PatronAdminService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/patrons';
+
+  // L0e — contact, status, account, and payments, with every fine and payment id.
+  async lookup(memberId: string): Promise<PatronDeskView> {
+    return firstValueFrom(this.http.get<PatronDeskView>(this.patron(memberId)));
+  }
 
   async enroll(request: EnrollPatronRequest): Promise<EnrolledPatron> {
     return firstValueFrom(this.http.post<EnrolledPatron>(this.base, request));

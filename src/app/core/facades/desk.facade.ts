@@ -3,6 +3,8 @@ import { CopyCondition, CopyStatus } from '../models';
 import { DeskService } from '../services/desk.service';
 import { DeskLog } from './desk-log';
 import { Outcome, attempt } from './outcome';
+import { PatronLookupFacade } from './patron-lookup.facade';
+import { TitleCopiesFacade } from './title-copies.facade';
 
 const whereTheCopyWent: Record<CopyStatus, string> = {
   AVAILABLE: 'back on the shelf',
@@ -12,11 +14,14 @@ const whereTheCopyWent: Record<CopyStatus, string> = {
   LOST: 'lost',
 };
 
-// Circulation and copies at the desk (L2b, L2c, L3a–L3c). Every result goes to the desk log.
+// Circulation and copies at the desk (L2b, L2c, L3a–L3c). Every result goes to the desk log; a change reloads the open
+// title's copies (L2d) and the patron looked up (L0e), whose status or loans it may have moved.
 @Injectable({ providedIn: 'root' })
 export class DeskFacade {
   private readonly service = inject(DeskService);
   private readonly log = inject(DeskLog);
+  private readonly copies = inject(TitleCopiesFacade);
+  private readonly lookup = inject(PatronLookupFacade);
 
   async checkOut(memberId: string, barcode: string): Promise<Outcome> {
     return this.run(`Check out ${barcode} to ${memberId}`, () => this.service.checkOut(memberId, barcode),
@@ -54,6 +59,11 @@ export class DeskFacade {
   }
 
   private async run<T>(action: string, fn: () => Promise<T>, confirm: (value: T) => string): Promise<Outcome> {
-    return this.log.record(action, await attempt(fn, confirm));
+    const outcome = await attempt(fn, confirm);
+    if (outcome.ok) {
+      this.copies.reload();
+      this.lookup.reload();
+    }
+    return this.log.record(action, outcome);
   }
 }
